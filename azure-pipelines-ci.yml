@@ -36,11 +36,11 @@ jobs:
       dotnet dev-certs https --trust || true
     displayName: 'dotnet dev-certs https'
 
-  # See: https://docs.sonarsource.com/sonarcloud/enriching/test-coverage/dotnet-test-coverage
-  - script: |
-      dotnet sonarscanner begin /k:"WireMock-Net_WireMock.Net" /o:"wiremock-net" /d:sonar.branch.name=$(Build.SourceBranchName) /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="$(SONAR_TOKEN)" /d:sonar.pullrequest.provider=github /d:sonar.dotnet.excludeTestProjects=true /d:sonar.cs.vscoveragexml.reportsPaths=**/wiremock-coverage-*.xml /d:sonar.verbose=true
-    displayName: 'Begin analysis on SonarCloud'
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  # # See: https://docs.sonarsource.com/sonarcloud/enriching/test-coverage/dotnet-test-coverage
+  # - script: |
+  #     dotnet sonarscanner begin /k:"WireMock-Net_WireMock.Net" /o:"wiremock-net" /d:sonar.branch.name=$(Build.SourceBranchName) /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="$(SONAR_TOKEN)" /d:sonar.pullrequest.provider=github /d:sonar.dotnet.excludeTestProjects=true /d:sonar.cs.vscoveragexml.reportsPaths=**/wiremock-coverage-*.xml /d:sonar.verbose=true
+  #   displayName: 'Begin analysis on SonarCloud'
+  #   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
 
   - task: DotNetCoreCLI@2
     displayName: 'Build Unit tests'
