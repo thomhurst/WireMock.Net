@@ -35,13 +35,13 @@ jobs:
   - script: |
       dotnet dev-certs https --trust || true
     displayName: 'dotnet dev-certs https'
-  
+
   # See: https://docs.sonarsource.com/sonarcloud/enriching/test-coverage/dotnet-test-coverage
   - script: |
       dotnet sonarscanner begin /k:"WireMock-Net_WireMock.Net" /o:"wiremock-net" /d:sonar.branch.name=$(Build.SourceBranchName) /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="$(SONAR_TOKEN)" /d:sonar.pullrequest.provider=github /d:sonar.dotnet.excludeTestProjects=true /d:sonar.cs.vscoveragexml.reportsPaths=**/wiremock-coverage-*.xml /d:sonar.verbose=true
     displayName: 'Begin analysis on SonarCloud'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  
+
   - task: DotNetCoreCLI@2
     displayName: 'Build Unit tests'
     inputs:
@@ -64,6 +64,7 @@ jobs:
           dotnet test ./test/WireMock.Net.TUnitTests/WireMock.Net.TUnitTests.csproj --configuration Debug --framework net8.0 -- --diagnostic
           find . -path "*/TestResults/*.log" -exec cat {} +
           find . -path "*/TestResults/*.diag" -exec cat {} +
+          find . -path "**/*.Generated.cs" -exec cat {} +
     displayName: 'Execute WireMock.Net.Tests with Coverage'
 
   - task: CmdLine@2
@@ -81,21 +82,21 @@ jobs:
       dotnet sonarscanner end /d:sonar.token="$(SONAR_TOKEN)"
     displayName: 'End analysis on SonarCloud'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
-  
+
   # - task: whitesource.ws-bolt.bolt.wss.WhiteSource Bolt@19
   #   displayName: 'WhiteSource Bolt'
   #   condition: and(succeeded(), eq(variables['RUN_WHITESOURCE'], 'yes'))
- 
+
   - script: |
       bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN) -f ./test/wiremock-coverage.xml
     displayName: 'Upload coverage results to codecov'
-  
+
   - task: PublishTestResults@2
     condition: and(succeeded(), eq(variables['PUBLISH_TESTRESULTS'], 'yes'))
     inputs:
       testRunner: VSTest
       testResultsFiles: '**/*.trx'
-  
+
   - task: PublishBuildArtifacts@1
     displayName: Publish coverage files
     inputs:
@@ -119,14 +120,14 @@ jobs:
       command: 'build'
       projects: './test/WireMock.Net.Tests/WireMock.Net.Tests.csproj'
       arguments: '--configuration Debug --framework net8.0'
-  
+
   - task: DotNetCoreCLI@2
     displayName: 'Execute Unit Tests with Coverage'
     inputs:
       command: 'test'
       projects: './test/WireMock.Net.Tests/WireMock.Net.Tests.csproj'
       arguments: '--no-build --configuration Debug --framework net8.0 --collect:"XPlat Code Coverage" --logger trx'
-  
+
 - job: Windows_Release_to_MyGet
   dependsOn: Windows_Build_Test
 
@@ -157,13 +158,13 @@ jobs:
       nobuild: true
       packDirectory: '$(Build.ArtifactStagingDirectory)/packages'
       verbosityPack: 'normal'
-  
+
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifacts
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-  
+
   - task: DotNetCoreCLI@2
     displayName: Push to MyGet
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
