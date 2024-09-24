@@ -82,9 +82,9 @@ jobs:
     displayName: 'End analysis on SonarCloud'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
   
-  - task: whitesource.ws-bolt.bolt.wss.WhiteSource Bolt@19
-    displayName: 'WhiteSource Bolt'
-    condition: and(succeeded(), eq(variables['RUN_WHITESOURCE'], 'yes'))
+  # - task: whitesource.ws-bolt.bolt.wss.WhiteSource Bolt@19
+  #   displayName: 'WhiteSource Bolt'
+  #   condition: and(succeeded(), eq(variables['RUN_WHITESOURCE'], 'yes'))
  
   - script: |
       bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN) -f ./test/wiremock-coverage.xml
